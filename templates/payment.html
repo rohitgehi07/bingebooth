@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout Payment — BingeBooth{% endblock %}
+
+{% block content %}
+
+<!-- Timer Bar -->
+<div class="bg-purple-950/80 border-b border-purple-800/60 py-3 sticky top-16 z-30 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+    <div class="flex items-center gap-2 text-xs font-semibold text-purple-200">
+      <i data-lucide="clock" class="w-4 h-4 text-pink-400"></i>
+      <span>{{ t('time_remaining') }}</span>
+      <span id="hold-timer-display" 
+            data-seconds="{{ remaining_seconds }}" 
+            data-redirect-url="{{ url_for('main.showtimes', slug=booking.show.movie.slug) }}" 
+            class="font-extrabold text-sm text-white font-mono bg-purple-900 px-2.5 py-0.5 rounded-lg border border-purple-500">
+        04:00
+      </span>
+    </div>
+
+    <span class="text-xs text-purple-300 font-medium">
+      Booking Code: <strong class="text-white font-mono">{{ booking.booking_code }}</strong>
+    </span>
+  </div>
+</div>
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10" x-data="{ payMethod: 'upi', isProcessing: false }">
+  
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left 2-Columns Payment Methods -->
+    <div class="lg:col-span-2 space-y-6">
+      
+      <div>
+        <h1 class="font-heading font-extrabold text-2xl text-gray-900 dark:text-white">{{ t('payment_title') }}</h1>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">100% safe & secure mock payment simulation</p>
+      </div>
+
+      <!-- NEW FEATURE 3: Promo / BingePoints Voucher Application Box -->
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-5 shadow-lg">
+        <h3 class="font-heading font-extrabold text-xs text-purple-700 dark:text-purple-400 uppercase tracking-wider mb-2">Have a BingePoints Promo Code?</h3>
+        <form action="{{ url_for('booking.payment', code=booking.booking_code) }}" method="POST" class="flex gap-2">
+          <input type="hidden" name="action" value="apply_promo">
+          <input type="text" name="promo_code" placeholder="e.g. POINTS50 or POINTS100" class="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 uppercase font-mono focus:outline-none focus:border-purple-500">
+          <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow">Apply</button>
+        </form>
+        {% if booking.discount_amount > 0 %}
+          <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2">✓ Promo code active! ₹{{ booking.discount_amount | int }} discount applied.</p>
+        {% endif %}
+      </div>
+
+      <!-- Payment Tabs -->
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl space-y-6">
+        
+        <div class="grid grid-cols-4 gap-2 border-b border-gray-200 dark:border-gray-800 pb-4">
+          <button type="button" @click="payMethod = 'upi'" :class="payMethod === 'upi' ? 'bg-purple-100 dark:bg-purple-900/60 border-purple-500 text-purple-900 dark:text-white font-bold' : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400'" class="py-3 rounded-2xl border text-xs text-center transition-all flex flex-col items-center gap-1">
+            <span class="text-base">📱</span> UPI
+          </button>
+          <button type="button" @click="payMethod = 'card'" :class="payMethod === 'card' ? 'bg-purple-100 dark:bg-purple-900/60 border-purple-500 text-purple-900 dark:text-white font-bold' : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400'" class="py-3 rounded-2xl border text-xs text-center transition-all flex flex-col items-center gap-1">
+            <span class="text-base">💳</span> Card
+          </button>
+          <button type="button" @click="payMethod = 'netbank'" :class="payMethod === 'netbank' ? 'bg-purple-100 dark:bg-purple-900/60 border-purple-500 text-purple-900 dark:text-white font-bold' : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400'" class="py-3 rounded-2xl border text-xs text-center transition-all flex flex-col items-center gap-1">
+            <span class="text-base">🏦</span> NetBank
+          </button>
+          <button type="button" @click="payMethod = 'wallet'" :class="payMethod === 'wallet' ? 'bg-purple-100 dark:bg-purple-900/60 border-purple-500 text-purple-900 dark:text-white font-bold' : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400'" class="py-3 rounded-2xl border text-xs text-center transition-all flex flex-col items-center gap-1">
+            <span class="text-base">👛</span> Wallet
+          </button>
+        </div>
+
+        <!-- Form for Payment -->
+        <form id="payment-form" action="{{ url_for('booking.payment', code=booking.booking_code) }}" method="POST" @submit="isProcessing = true">
+          <input type="hidden" name="action" id="payment-action-input" value="pay">
+
+          <!-- UPI Form -->
+          <div x-show="payMethod === 'upi'" class="space-y-4">
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Virtual Payment Address (VPA / UPI ID)</label>
+            <input type="text" value="user@bingebooth" placeholder="e.g. mobile@upi or username@okaxis" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 font-mono">
+            <p class="text-[11px] text-gray-500">Accepted: Google Pay, PhonePe, Paytm, BHIM UPI</p>
+          </div>
+
+          <!-- Card Form -->
+          <div x-show="payMethod === 'card'" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Card Number</label>
+              <input type="text" value="4532 •••• •••• 8892" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 font-mono">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Expiry Date</label>
+                <input type="text" value="12/28" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">CVV</label>
+                <input type="password" value="888" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 font-mono">
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Banking Form -->
+          <div x-show="payMethod === 'netbank'" class="space-y-4">
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Select Popular Bank</label>
+            <select class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              <option>HDFC Bank</option>
+              <option>ICICI Bank</option>
+              <option>State Bank of India (SBI)</option>
+              <option>Axis Bank</option>
+            </select>
+          </div>
+
+          <!-- Wallet Form -->
+          <div x-show="payMethod === 'wallet'" class="space-y-4">
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Select Wallet</label>
+            <select class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              <option>Paytm Wallet</option>
+              <option>Amazon Pay</option>
+              <option>Mobikwik</option>
+            </select>
+          </div>
+
+          <!-- Submit Pay Button -->
+          <div class="pt-6 space-y-3">
+            <button type="submit" 
+                    :disabled="isProcessing"
+                    class="w-full bg-gradient-binge text-white font-extrabold text-sm py-4 rounded-2xl shadow-xl shadow-purple-600/40 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+              <template x-if="!isProcessing">
+                <span class="flex items-center gap-2">
+                  <i data-lucide="lock" class="w-4 h-4"></i>
+                  <span>Pay ₹{{ booking.total_amount }}</span>
+                </span>
+              </template>
+              <template x-if="isProcessing">
+                <span class="flex items-center gap-2">
+                  <span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  <span>Processing Payment...</span>
+                </span>
+              </template>
+            </button>
+
+            <!-- Test Payment Failure Simulation Button -->
+            <button type="button" 
+                    onclick="document.getElementById('payment-action-input').value = 'simulate_failure'; document.getElementById('payment-form').submit();"
+                    class="w-full bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-900/60 border border-red-300 dark:border-red-700/50 text-red-700 dark:text-red-300 text-xs font-semibold py-2.5 rounded-2xl transition-colors">
+              ⚠️ {{ t('simulate_failure') }}
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+    <!-- Right Summary Column -->
+    <div class="lg:col-span-1">
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl space-y-6">
+        
+        <h3 class="font-heading font-extrabold text-lg text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800 pb-3">Final Order</h3>
+
+        <div class="space-y-2 text-xs">
+          <p class="font-bold text-gray-900 dark:text-white text-sm">{{ booking.show.movie.title }}</p>
+          <p class="text-gray-600 dark:text-gray-300">{{ booking.show.screen.theatre.name }}</p>
+          <p class="text-gray-500 dark:text-gray-400">Seats: <strong class="text-gray-900 dark:text-white font-mono">{{ booking.seats_label }}</strong></p>
+        </div>
+
+        <hr class="border-gray-200 dark:border-gray-800">
+
+        <div class="space-y-2 text-xs text-gray-600 dark:text-gray-300">
+          <div class="flex justify-between">
+            <span>Ticket Base Price</span>
+            <span>₹{{ booking.ticket_amount | int }}</span>
+          </div>
+          {% if booking.food_amount > 0 %}
+            <div class="flex justify-between">
+              <span>Food & Snacks</span>
+              <span>₹{{ booking.food_amount | int }}</span>
+            </div>
+          {% endif %}
+          {% if booking.discount_amount > 0 %}
+            <div class="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
+              <span>Points Discount</span>
+              <span>-₹{{ booking.discount_amount | int }}</span>
+            </div>
+          {% endif %}
+          <div class="flex justify-between">
+            <span>Fee & Taxes (GST 18%)</span>
+            <span>₹{{ (booking.convenience_fee + booking.gst) | round(2) }}</span>
+          </div>
+          <hr class="border-gray-200 dark:border-gray-800 my-2">
+          <div class="flex justify-between text-base font-extrabold text-gray-900 dark:text-white">
+            <span>Amount Payable</span>
+            <span class="text-gradient-binge">₹{{ booking.total_amount }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- NEW FEATURE: Pre-show Movie Trivia Mini-Quiz Card -->
+      <div class="bg-bingeSurface border border-purple-200 dark:border-purple-800/60 rounded-3xl p-5 shadow-xl space-y-4 mt-6" x-data="paymentTriviaApp({{ booking.show.movie.id }})">
+        
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🧠</span>
+            <div>
+              <h3 class="font-heading font-extrabold text-sm text-gray-900 dark:text-white">Movie Trivia</h3>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400">Earn BingePoints while waiting!</p>
+            </div>
+          </div>
+          <div class="bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700/60 px-3 py-1 rounded-full text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1 shadow-sm">
+            <span>🪙</span>
+            <span x-text="earnedPoints">0</span> <span class="text-[10px]">pts</span>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="isLoading" class="py-6 text-center text-xs text-gray-500">
+          <span class="animate-spin inline-block text-purple-600 font-bold mr-1">🌀</span> Loading trivia...
+        </div>
+
+        <!-- Empty State -->
+        <div x-show="!isLoading && questions.length === 0" class="py-4 text-center text-xs text-gray-500 dark:text-gray-400 space-y-1">
+          <span class="text-xl">🍿</span>
+          <p class="font-semibold">No trivia for this movie yet — check back soon!</p>
+        </div>
+
+        <!-- Active Question View -->
+        <div x-show="!isLoading && questions.length > 0 && currentIndex < questions.length" class="space-y-4">
+          <div class="flex items-center justify-between text-[11px] font-semibold text-purple-600 dark:text-purple-400">
+            <span>Question <span x-text="currentIndex + 1"></span> of <span x-text="questions.length"></span></span>
+            <span class="bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded font-mono">+<span x-text="currentQ ? currentQ.points_reward : 5"></span> pts</span>
+          </div>
+
+          <p class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-relaxed" x-text="currentQ ? currentQ.question_text : ''"></p>
+
+          <!-- 3 Option Buttons -->
+          <div class="space-y-2">
+            <template x-for="optKey in ['a', 'b', 'c']" :key="optKey">
+              <button type="button" 
+                      @click="selectOption(optKey)"
+                      :disabled="isAnswered"
+                      :class="getOptionClass(optKey)"
+                      class="w-full text-left p-3 rounded-2xl border text-xs font-semibold transition-all flex items-center justify-between gap-2 shadow-sm">
+                <span x-text="getOptionText(optKey)"></span>
+                
+                <template x-if="isAnswered && optKey === selectedOpt">
+                  <span x-text="isCorrect ? '✓ Correct!' : '✕ Incorrect'"></span>
+                </template>
+              </button>
+            </template>
+          </div>
+
+          <!-- Instant Feedback Result Alert -->
+          <div x-show="feedbackMessage" 
+               :class="isCorrect ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 text-emerald-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-950/60 border-red-300 text-red-800 dark:text-red-300'"
+               class="p-3 rounded-xl border text-xs font-bold transition-all flex items-center gap-2">
+            <span x-text="isCorrect ? '🎉' : '💡'"></span>
+            <span x-text="feedbackMessage"></span>
+          </div>
+        </div>
+
+        <!-- Quiz Completed View -->
+        <div x-show="!isLoading && questions.length > 0 && currentIndex >= questions.length" class="py-6 text-center space-y-3">
+          <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl shadow">
+            🎉
+          </div>
+          <h4 class="font-heading font-extrabold text-sm text-gray-900 dark:text-white">Nice! You're all caught up</h4>
+          <p class="text-xs text-gray-600 dark:text-gray-400">
+            You earned <strong class="text-purple-600 dark:text-purple-400 font-mono" x-text="earnedPoints"></strong> BingePoints!
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+function paymentTriviaApp(movieId) {
+  return {
+    movieId: movieId,
+    questions: [],
+    currentIndex: 0,
+    earnedPoints: 0,
+    isLoading: true,
+    isAnswered: false,
+    selectedOpt: null,
+    isCorrect: false,
+    feedbackMessage: '',
+
+    get currentQ() {
+      return this.questions[this.currentIndex] || null;
+    },
+
+    init() {
+      fetch(`/api/movie/${this.movieId}/trivia`)
+        .then(res => res.json())
+        .then(data => {
+          this.isLoading = false;
+          if (data.success && data.questions) {
+            this.questions = data.questions;
+          }
+        })
+        .catch(() => { this.isLoading = false; });
+    },
+
+    getOptionText(key) {
+      if (!this.currentQ) return '';
+      if (key === 'a') return `A. ${this.currentQ.option_a}`;
+      if (key === 'b') return `B. ${this.currentQ.option_b}`;
+      if (key === 'c') return `C. ${this.currentQ.option_c}`;
+      return '';
+    },
+
+    getOptionClass(key) {
+      if (!this.isAnswered) {
+        return 'bg-gray-50 dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-purple-950/60 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200';
+      }
+      if (this.currentQ && key === this.currentQ.correct_option) {
+        return 'bg-emerald-100 dark:bg-emerald-950 border-emerald-500 text-emerald-900 dark:text-emerald-200 font-bold';
+      }
+      if (key === this.selectedOpt && !this.isCorrect) {
+        return 'bg-red-100 dark:bg-red-950 border-red-500 text-red-900 dark:text-red-200 font-bold';
+      }
+      return 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-400 opacity-60';
+    },
+
+    selectOption(key) {
+      if (this.isAnswered || !this.currentQ) return;
+      this.isAnswered = true;
+      this.selectedOpt = key;
+
+      fetch('/api/trivia/award', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question_id: this.currentQ.id,
+          selected_option: key
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        this.isCorrect = data.is_correct;
+        this.feedbackMessage = data.message;
+        if (data.is_correct) {
+          this.earnedPoints += (data.points_earned || 5);
+        }
+
+        setTimeout(() => {
+          this.currentIndex++;
+          this.isAnswered = false;
+          this.selectedOpt = null;
+          this.feedbackMessage = '';
+        }, 1500);
+      })
+      .catch(() => {
+        setTimeout(() => {
+          this.currentIndex++;
+          this.isAnswered = false;
+          this.selectedOpt = null;
+        }, 1500);
+      });
+    }
+  }
+}
+</script>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/holdtimer.js') }}"></script>
+{% endblock %}

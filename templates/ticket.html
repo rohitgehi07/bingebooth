@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Digital Ticket — {{ booking.booking_code }}{% endblock %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto px-4 py-12">
+  
+  <div class="text-center space-y-2 mb-8">
+    <div class="w-14 h-14 rounded-full bg-emerald-950 border border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto shadow-lg text-2xl">
+      🎉
+    </div>
+    <h1 class="font-heading font-extrabold text-3xl text-white">{{ t('ticket_confirmed') }}</h1>
+    <p class="text-xs text-gray-400">Show this digital m-ticket at the cinema entrance</p>
+  </div>
+
+  <!-- Digital Perforated Ticket Card -->
+  <div id="ticket-card-export" class="ticket-card bg-bingeSurface border border-gray-700/80 rounded-3xl overflow-hidden shadow-2xl p-6 md:p-8 space-y-6 relative">
+    
+    <!-- Ticket Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-6">
+      
+      <div class="flex items-center gap-4">
+        <img src="{{ booking.show.movie.poster_url }}" alt="{{ booking.show.movie.title }}" class="w-16 h-24 object-cover rounded-xl border border-gray-700 shadow" onerror="this.onerror=null;this.src='/static/img/posters/placeholder.jpg';">
+        <div>
+          <span class="bg-purple-950 text-purple-300 border border-purple-600/40 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+            {{ booking.show.format }} • {{ booking.show.language }}
+          </span>
+          <h2 class="font-heading font-extrabold text-xl text-white mt-1">{{ booking.show.movie.title }}</h2>
+          <p class="text-xs text-gray-400">{{ booking.show.screen.theatre.name }}</p>
+        </div>
+      </div>
+
+      <!-- QR Code Block -->
+      <div class="flex flex-col items-center justify-center bg-white p-2.5 rounded-2xl shadow self-center sm:self-auto">
+        <div id="qrcode-container"></div>
+        <span class="text-[10px] font-extrabold font-mono text-gray-900 mt-1">{{ booking.booking_code }}</span>
+      </div>
+
+    </div>
+
+    <!-- Ticket Details Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+      <div>
+        <span class="text-gray-400 block font-semibold text-[10px] uppercase">DATE & TIME</span>
+        <span class="font-bold text-white text-sm mt-0.5 block">{{ booking.show.show_datetime.strftime('%b %d, %Y') }}</span>
+        <span class="text-purple-400 font-semibold">{{ booking.show.show_datetime.strftime('%I:%M %p') }}</span>
+      </div>
+
+      <div>
+        <span class="text-gray-400 block font-semibold text-[10px] uppercase">THEATRE / AUDI</span>
+        <span class="font-bold text-white text-sm mt-0.5 block">{{ booking.show.screen.name }}</span>
+        <span class="text-gray-300">{{ booking.show.screen.theatre.city.name }}</span>
+      </div>
+
+      <div>
+        <span class="text-gray-400 block font-semibold text-[10px] uppercase">SEATS</span>
+        <span class="font-extrabold text-pink-400 text-base mt-0.5 block font-mono">{{ booking.seats_label }}</span>
+      </div>
+
+      <div>
+        <span class="text-gray-400 block font-semibold text-[10px] uppercase">TOTAL PAID</span>
+        <span class="font-extrabold text-white text-base mt-0.5 block">₹{{ booking.total_amount }}</span>
+      </div>
+    </div>
+
+    <!-- Food Addons List if present -->
+    {% if booking_foods %}
+      <div class="border-t border-gray-800 pt-4">
+        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Pre-Ordered Snacks & Drinks</span>
+        <div class="flex flex-wrap gap-2 text-xs">
+          {% for bf in booking_foods %}
+            <span class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-xl text-gray-200">
+              🍿 {{ bf.food_item.name }} x{{ bf.quantity }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Footer Support Info -->
+    <div class="border-t border-dashed border-gray-700 pt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-400 gap-2">
+      <span>Booking ID: <strong class="text-white font-mono">{{ booking.booking_code }}</strong></span>
+      <span class="flex items-center gap-1 text-purple-400">
+        <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+        Need Help? Call 24/7 Helpline: <a href="tel:7888081697" class="font-bold underline text-white">7888081697</a>
+      </span>
+    </div>
+
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+    <button id="download-ticket-btn" class="w-full sm:w-auto bg-gradient-binge text-white font-extrabold text-xs px-8 py-3.5 rounded-2xl shadow-xl shadow-purple-600/40 hover:scale-105 transition-all flex items-center justify-center gap-2">
+      <i data-lucide="download" class="w-4 h-4"></i>
+      <span>{{ t('download_ticket') }}</span>
+    </button>
+
+    <a href="tel:7888081697" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white font-semibold text-xs px-6 py-3.5 rounded-2xl border border-gray-700 transition-colors flex items-center justify-center gap-2">
+      <i data-lucide="headphones" class="w-4 h-4 text-pink-400"></i>
+      <span>Call Support (7888081697)</span>
+    </a>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Generate QR Code
+    new QRCode(document.getElementById("qrcode-container"), {
+      text: "{{ booking.booking_code }}",
+      width: 70,
+      height: 70,
+      colorDark : "#0B0B12",
+      colorLight : "#ffffff",
+      correctLevel : QRCode.CorrectLevel.H
+    });
+
+    // Download ticket as PNG image via html2canvas
+    const downloadBtn = document.getElementById('download-ticket-btn');
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', () => {
+        const ticketCard = document.getElementById('ticket-card-export');
+        html2canvas(ticketCard, { backgroundColor: '#0B0B12' }).then(canvas => {
+          const link = document.createElement('a');
+          link.download = `BingeBooth-Ticket-${ "{{ booking.booking_code }}" }.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}

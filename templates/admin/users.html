@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+  
+  <div>
+    <h1 class="font-heading font-extrabold text-2xl text-white">Registered Users</h1>
+    <p class="text-xs text-gray-400 mt-1">View user accounts and manage administrator permissions</p>
+  </div>
+
+  <div class="bg-bingeSurface border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-gray-300">
+        <thead class="bg-gray-900 text-gray-400 uppercase text-[10px] font-bold border-b border-gray-800">
+          <tr>
+            <th class="p-4">User</th>
+            <th class="p-4">Email</th>
+            <th class="p-4">Phone</th>
+            <th class="p-4">Bookings Count</th>
+            <th class="p-4">Role</th>
+            <th class="p-4">Toggle Role</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800/80">
+          {% for u in users %}
+            <tr class="hover:bg-gray-800/40">
+              <td class="p-4 font-bold text-white flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-gradient-binge text-white flex items-center justify-center text-xs">
+                  {{ u.name[0] | upper }}
+                </div>
+                <span>{{ u.name }}</span>
+              </td>
+              <td class="p-4 text-gray-300">{{ u.email }}</td>
+              <td class="p-4 text-gray-400 font-mono">{{ u.phone or '—' }}</td>
+              <td class="p-4 font-bold text-purple-400">{{ u.bookings | length }}</td>
+              <td class="p-4">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase
+                             {% if u.is_admin %} bg-pink-950 text-pink-300 border border-pink-700
+                             {% else %} bg-gray-800 text-gray-400 {% endif %}">
+                  {{ 'Admin' if u.is_admin else 'User' }}
+                </span>
+              </td>
+              <td class="p-4">
+                {% if u.id != current_user.id %}
+                  <form action="{{ url_for('admin.users') }}" method="POST">
+                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                    <button type="submit" class="bg-gray-800 hover:bg-gray-700 text-xs font-semibold px-3 py-1 rounded-lg border border-gray-700">
+                      Toggle Admin
+                    </button>
+                  </form>
+                {% else %}
+                  <span class="text-gray-500 text-[11px]">(Current User)</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

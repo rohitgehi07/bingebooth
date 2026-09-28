@@ -1,0 +1,517 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('brand_name') }} — Ultimate Movie Ticket Booking Platform{% endblock %}
+
+{% block content %}
+
+<!-- Hero Banner Carousel Section -->
+<section class="relative w-full overflow-hidden bg-gray-900 text-white py-6" x-data="{ activeSlide: 0, slidesCount: {{ hero_featured | length }} }">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative rounded-3xl overflow-hidden aspect-[21/9] min-h-[360px] md:min-h-[440px] border border-gray-800 shadow-2xl bg-gray-950">
+      
+      {% for movie in hero_featured %}
+        <div x-show="activeSlide === {{ loop.index0 }}" 
+             x-transition:enter="transition ease-out duration-700"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="absolute inset-0 flex items-center">
+          
+          <!-- Background Banner Image -->
+          <img src="{{ movie.banner_url }}" alt="{{ movie.title }}" class="absolute inset-0 w-full h-full object-cover object-center">
+          
+          <!-- Left-to-Right Dark Gradient Overlay -->
+          <div class="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/85 to-transparent"></div>
+
+          <!-- Hero Content Left Side -->
+          <div class="relative z-10 p-6 md:p-12 max-w-2xl flex flex-col justify-center space-y-4">
+            
+            <div class="flex items-center gap-2 text-xs font-semibold">
+              <span class="bg-amber-500/20 text-amber-400 border border-amber-500/40 px-3 py-1 rounded-full flex items-center gap-1">
+                <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i> {{ movie.rating }} / 10
+              </span>
+              <span class="text-gray-300">{{ movie.duration_minutes }} mins</span>
+              <span class="text-gray-400">• {{ movie.certificate }}</span>
+              <span class="bg-purple-950/80 text-purple-300 border border-purple-500/40 px-2.5 py-0.5 rounded uppercase">{{ movie.formats }}</span>
+            </div>
+
+            <h1 class="font-heading font-extrabold text-3xl sm:text-5xl text-white tracking-tight leading-none">
+              {{ movie.title_hi if current_lang == 'hi' and movie.title_hi else movie.title }}
+            </h1>
+
+            <p class="text-xs sm:text-sm text-gray-300 line-clamp-2">
+              {{ movie.description_hi if current_lang == 'hi' and movie.description_hi else movie.description }}
+            </p>
+
+            <div class="flex items-center gap-3 pt-2">
+              <a href="{{ url_for('main.showtimes', slug=movie.slug) }}" class="bg-gradient-binge text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-full shadow-lg shadow-purple-600/40 hover:scale-105 transition-all flex items-center gap-2">
+                <i data-lucide="ticket" class="w-4 h-4"></i>
+                <span>{{ t('hero_book_now') }}</span>
+              </a>
+
+              <a href="{{ url_for('main.movie_detail', slug=movie.slug) }}" class="bg-gray-800/90 hover:bg-gray-700 text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded-full border border-gray-700 transition-colors flex items-center gap-2">
+                <i data-lucide="play" class="w-4 h-4 text-pink-400"></i>
+                <span>{{ t('hero_watch_trailer') }}</span>
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+      {% endfor %}
+
+      <!-- Carousel Indicators Dots -->
+      <div class="absolute bottom-4 right-6 z-20 flex items-center gap-2">
+        {% for movie in hero_featured %}
+          <button @click="activeSlide = {{ loop.index0 }}" 
+                  :class="activeSlide === {{ loop.index0 }} ? 'w-8 bg-gradient-binge' : 'w-2 bg-gray-600'" 
+                  class="h-2 rounded-full transition-all duration-300"
+                  aria-label="Slide {{ loop.index }}"></button>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Section 1: Now Showing in City -->
+<section class="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-gray-900 dark:text-white">
+        {{ t('now_showing') }} <span class="text-gradient-binge">{{ current_city }}</span>
+      </h2>
+      <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Explore trending blockbusters playing in theatres near you</p>
+    </div>
+
+    <!-- Scroll Arrow Buttons -->
+    <div class="flex items-center gap-2">
+      <button onclick="document.getElementById('now-showing-row').scrollBy({left: -320, behavior: 'smooth'})" 
+              class="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-purple-600 dark:hover:bg-purple-900 text-gray-700 dark:text-gray-300 hover:text-white transition-colors flex items-center justify-center">
+        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+      </button>
+      <button onclick="document.getElementById('now-showing-row').scrollBy({left: 320, behavior: 'smooth'})" 
+              class="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-purple-600 dark:hover:bg-purple-900 text-gray-700 dark:text-gray-300 hover:text-white transition-colors flex items-center justify-center">
+        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Scrollable Row -->
+  <div id="now-showing-row" class="flex items-stretch gap-5 overflow-x-auto no-scrollbar scroll-smooth py-2">
+    {% for movie in now_showing %}
+      <div class="w-48 sm:w-56 flex-shrink-0 movie-card-wrapper">
+        {% include 'partials/movie_card.html' %}
+      </div>
+    {% else %}
+      <div class="w-full bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+        No now-showing movies listed for {{ current_city }} yet.
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- NEW FEATURE 1: BingeBooth Smart Movie Recommendations Section -->
+<section class="py-12 bg-bingeSurface border-y border-gray-200 dark:border-gray-800" x-data="recommendationEngine()">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <span class="inline-block bg-purple-100 dark:bg-purple-950/80 border border-purple-300 dark:border-purple-600/50 text-purple-700 dark:text-purple-300 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider mb-1">
+          ✨ AI-Assisted Discovery
+        </span>
+        <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-gray-900 dark:text-white">
+          BingeBooth Recommendations
+        </h2>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Filter by mood, genre, rating, or let us pick something great for you</p>
+      </div>
+
+      <button @click="fetchRecommendations()" class="bg-gradient-binge text-white font-extrabold text-xs px-6 py-3 rounded-2xl shadow-lg shadow-purple-600/30 hover:scale-105 transition-all flex items-center justify-center gap-2">
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+        <span>Recommend Something For Me</span>
+      </button>
+    </div>
+
+    <!-- Filter Control Panel -->
+    <div class="bg-bingeElevated border border-gray-200 dark:border-gray-800 rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-xs">
+      
+      <div>
+        <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Genre</label>
+        <select x-model="selectedGenre" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-purple-500">
+          <option value="">Any Genre</option>
+          {% for g in genres %}
+            <option value="{{ g }}">{{ g }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Language</label>
+        <select x-model="selectedLang" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-purple-500">
+          <option value="">Any Language</option>
+          {% for l in languages %}
+            <option value="{{ l }}">{{ l }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Mood</label>
+        <select x-model="selectedMood" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-purple-500">
+          <option value="">Any Mood</option>
+          <option value="Feel-good">😊 Feel-good</option>
+          <option value="Intense">🔥 Intense</option>
+          <option value="Romantic">💖 Romantic</option>
+          <option value="Thrilling">⚡ Thrilling</option>
+          <option value="Funny">😂 Funny</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Type</label>
+        <select x-model="selectedType" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-purple-500">
+          <option value="">All Types</option>
+          <option value="now_showing">Now Showing</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="classic">Classics Vault</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Min Rating</label>
+        <select x-model="minRating" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-purple-500">
+          <option value="0">All Ratings</option>
+          <option value="8.0">★ 8.0+</option>
+          <option value="8.5">★ 8.5+</option>
+          <option value="9.0">★ 9.0+</option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div x-show="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {% for _ in range(4) %}
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 animate-pulse space-y-3">
+          <div class="h-40 bg-gray-200 dark:bg-gray-800 rounded-xl"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+          <div class="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Recommendations Results Cards -->
+    <div x-show="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <template x-for="item in recommendations" :key="item.id">
+        <div class="poster-card rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-md border border-gray-200 dark:border-gray-800">
+          <div class="space-y-3">
+            <div class="aspect-video w-full rounded-xl overflow-hidden bg-gray-900 relative">
+              <img :src="item.poster_url" :alt="item.title" class="w-full h-full object-cover">
+              <div class="absolute top-2 left-2 bg-black/80 text-amber-400 border border-gray-700 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                ★ <span x-text="item.rating"></span>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-heading font-extrabold text-sm text-gray-900 dark:text-white" x-text="item.title"></h4>
+              <p class="text-[11px] text-purple-600 dark:text-purple-400 font-semibold mt-0.5" x-text="item.genres"></p>
+              <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2" x-text="item.description"></p>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-gray-200 dark:border-gray-800 space-y-2">
+            <!-- Dynamic Reason Tagline -->
+            <p class="text-[11px] italic text-pink-600 dark:text-pink-400 font-medium" x-text="item.reason"></p>
+            
+            <a :href="item.is_classic ? '/movie/classic/' + item.slug : '/movie/' + item.slug + '/shows'" 
+               class="block w-full bg-gradient-binge text-white text-center font-bold text-xs py-2.5 rounded-xl shadow hover:opacity-95 transition-opacity">
+              <span x-text="item.is_classic ? 'View Classic Details' : 'Book Now (' + item.showtime + ')'"></span>
+            </a>
+          </div>
+        </div>
+      </template>
+    </div>
+
+  </div>
+</section>
+
+<!-- Section 2: Browse by Genre & Language -->
+<section class="py-8 bg-bingeDark">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    
+    <div>
+      <h3 class="font-heading font-bold text-xs uppercase tracking-widest text-purple-600 dark:text-purple-400 mb-3">{{ t('browse_by_genre') }}</h3>
+      <div class="flex flex-wrap gap-2.5" id="genre-chips-container">
+        {% for g in genres %}
+          <button data-genre-chip="{{ g }}" class="genre-chip bg-bingeSurface hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-gray-200 dark:border-gray-700/80 text-gray-800 dark:text-gray-200 text-xs font-semibold px-4 py-2 rounded-full transition-all shadow-sm">
+            🎬 {{ g }}
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div>
+      <h3 class="font-heading font-bold text-xs uppercase tracking-widest text-pink-600 dark:text-pink-400 mb-3">{{ t('browse_by_language') }}</h3>
+      <div class="flex flex-wrap gap-2.5" id="language-chips-container">
+        {% for l in languages %}
+          <button data-language-chip="{{ l }}" class="language-chip bg-bingeSurface hover:bg-pink-100 dark:hover:bg-pink-900/60 border border-gray-200 dark:border-gray-700/80 text-gray-800 dark:text-gray-200 text-xs font-semibold px-4 py-2 rounded-full transition-all shadow-sm">
+            🗣️ {{ l }}
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Section 3: Upcoming Movies -->
+<section class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-gray-900 dark:text-white">{{ t('upcoming_movies') }}</h2>
+      <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Get ready for highly anticipated releases arriving soon</p>
+    </div>
+  </div>
+
+  <div id="upcoming-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
+    {% for movie in upcoming %}
+      <div class="movie-card-wrapper">
+        {% include 'partials/movie_card.html' %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Section 4: Timeless Classics & Re-runs -->
+<section class="py-12 bg-bingeSurface border-t border-gray-200 dark:border-gray-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-amber-600 dark:text-amber-400 flex items-center gap-2">
+          <span>🏆 {{ t('timeless_classics') }}</span>
+        </h2>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Experience iconic vintage masterpieces back on the big screen</p>
+      </div>
+      <a href="{{ url_for('main.classics') }}" class="text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline">
+        Explore Full Vault →
+      </a>
+    </div>
+
+    <div id="classics-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
+      {% for movie in classics %}
+        <div class="movie-card-wrapper">
+          {% include 'partials/movie_card.html' %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- City Selector Modal -->
+<div id="city-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+  <div class="bg-white dark:bg-bingeElevated border border-gray-200 dark:border-gray-700/90 rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] flex flex-col">
+    
+    <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-800">
+      <div>
+        <h3 class="font-heading font-extrabold text-xl text-gray-900 dark:text-white">Where are you watching from?</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Select your city to view local movie showtimes</p>
+      </div>
+      <button id="close-city-modal-btn" type="button" class="text-gray-400 hover:text-gray-900 dark:hover:text-white p-1">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <div class="my-4">
+      <button id="detect-location-btn" class="w-full bg-gradient-binge text-white font-bold text-xs py-3 rounded-2xl shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 hover:opacity-95 transition-opacity">
+        <i data-lucide="crosshair" class="w-4 h-4"></i>
+        <span>{{ t('detect_location') }}</span>
+      </button>
+    </div>
+
+    <div class="relative mb-4">
+      <input type="text" id="city-search-input" placeholder="Search your city..." class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl py-2.5 pl-10 pr-4 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:border-purple-500">
+      <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+    </div>
+
+    <div class="overflow-y-auto space-y-6 flex-1 pr-1">
+      <div>
+        <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Popular Cities</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {% for city_name in ['Mumbai', 'Delhi NCR', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad'] %}
+            <button type="button" data-city="{{ city_name }}" class="city-select-btn bg-gray-100 dark:bg-gray-900 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-gray-200 dark:border-gray-800 hover:border-purple-500 text-gray-800 dark:text-gray-200 text-xs font-semibold py-2.5 px-3 rounded-xl transition-all text-center">
+              {{ city_name }}
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Maharashtra Districts</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          {% for district in ['Jalgaon', 'Nashik', 'Nagpur', 'Aurangabad', 'Kolhapur', 'Solapur', 'Amravati', 'Akola', 'Dhule', 'Nanded', 'Satara', 'Sangli', 'Latur', 'Ahmednagar', 'Ratnagiri', 'Jalna', 'Chandrapur', 'Beed'] %}
+            <button type="button" data-city="{{ district }}" class="city-select-btn bg-gray-100 dark:bg-gray-900 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-gray-200 dark:border-gray-800 hover:border-purple-500 text-gray-800 dark:text-gray-200 text-xs font-semibold py-2 px-3 rounded-xl transition-all text-left truncate">
+              {{ district }}
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  window.isFirstVisit = {{ 'true' if not session.get('city_name') else 'false' }};
+
+  function recommendationEngine() {
+    return {
+      selectedGenre: '',
+      selectedLang: '',
+      selectedMood: '',
+      selectedType: '',
+      minRating: '0',
+      loading: false,
+      recommendations: [],
+
+      init() {
+        this.fetchRecommendations();
+      },
+
+      fetchRecommendations() {
+        this.loading = true;
+        fetch('/api/recommendations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            genre: this.selectedGenre,
+            language: this.selectedLang,
+            mood: this.selectedMood,
+            movie_type: this.selectedType,
+            min_rating: this.minRating
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          this.loading = false;
+          if (data.success) {
+            this.recommendations = data.recommendations;
+          }
+        })
+        .catch(() => {
+          this.loading = false;
+        });
+      }
+    }
+  }
+</script>
+
+<!-- FIX 2: Client-side Genre & Language Chip Filter Engine -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let activeGenre = null;
+  let activeLanguage = null;
+
+  const genreChips = document.querySelectorAll('[data-genre-chip]');
+  const languageChips = document.querySelectorAll('[data-language-chip]');
+
+  genreChips.forEach(chip => {
+    chip.addEventListener('click', function(e) {
+      e.preventDefault();
+      const genre = this.getAttribute('data-genre-chip');
+      if (activeGenre === genre) {
+        activeGenre = null;
+      } else {
+        activeGenre = genre;
+      }
+      updateChipStyles();
+      filterMovieGrids();
+    });
+  });
+
+  languageChips.forEach(chip => {
+    chip.addEventListener('click', function(e) {
+      e.preventDefault();
+      const lang = this.getAttribute('data-language-chip');
+      if (activeLanguage === lang) {
+        activeLanguage = null;
+      } else {
+        activeLanguage = lang;
+      }
+      updateChipStyles();
+      filterMovieGrids();
+    });
+  });
+
+  function updateChipStyles() {
+    genreChips.forEach(chip => {
+      const g = chip.getAttribute('data-genre-chip');
+      if (g === activeGenre) {
+        chip.className = 'genre-chip bg-gradient-binge text-white border-transparent text-xs font-bold px-4 py-2 rounded-full transition-all shadow-md shadow-purple-600/30 scale-105';
+      } else {
+        chip.className = 'genre-chip bg-bingeSurface hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-gray-200 dark:border-gray-700/80 text-gray-800 dark:text-gray-200 text-xs font-semibold px-4 py-2 rounded-full transition-all shadow-sm';
+      }
+    });
+
+    languageChips.forEach(chip => {
+      const l = chip.getAttribute('data-language-chip');
+      if (l === activeLanguage) {
+        chip.className = 'language-chip bg-gradient-binge text-white border-transparent text-xs font-bold px-4 py-2 rounded-full transition-all shadow-md shadow-pink-600/30 scale-105';
+      } else {
+        chip.className = 'language-chip bg-bingeSurface hover:bg-pink-100 dark:hover:bg-pink-900/60 border border-gray-200 dark:border-gray-700/80 text-gray-800 dark:text-gray-200 text-xs font-semibold px-4 py-2 rounded-full transition-all shadow-sm';
+      }
+    });
+  }
+
+  function filterMovieGrids() {
+    const sections = [
+      { id: 'now-showing-row', emptyId: 'now-showing-empty' },
+      { id: 'upcoming-grid', emptyId: 'upcoming-empty' },
+      { id: 'classics-grid', emptyId: 'classics-empty' }
+    ];
+
+    sections.forEach(sec => {
+      const container = document.getElementById(sec.id);
+      if (!container) return;
+
+      const wrappers = container.querySelectorAll('.movie-card-wrapper');
+      let visibleCount = 0;
+
+      wrappers.forEach(wrapper => {
+        const card = wrapper.querySelector('[data-movie-card="true"]');
+        if (!card) return;
+
+        const cardGenres = (card.getAttribute('data-genres') || '').toLowerCase();
+        const cardLanguages = (card.getAttribute('data-languages') || '').toLowerCase();
+
+        const matchGenre = !activeGenre || cardGenres.includes(activeGenre.toLowerCase());
+        const matchLang = !activeLanguage || cardLanguages.includes(activeLanguage.toLowerCase());
+
+        if (matchGenre && matchLang) {
+          wrapper.style.display = '';
+          visibleCount++;
+        } else {
+          wrapper.style.display = 'none';
+        }
+      });
+
+      let emptyDiv = document.getElementById(sec.emptyId);
+      if (visibleCount === 0 && (activeGenre || activeLanguage)) {
+        if (!emptyDiv) {
+          emptyDiv = document.createElement('div');
+          emptyDiv.id = sec.emptyId;
+          emptyDiv.className = 'w-full col-span-full bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-8 text-center text-gray-600 dark:text-gray-400 text-sm my-4';
+          emptyDiv.innerHTML = '<p class="font-extrabold text-base text-gray-900 dark:text-white">🎬 No movies found for this filter — try another genre!</p><p class="text-xs text-purple-600 dark:text-purple-400 mt-1">Try selecting a different genre or language chip above.</p>';
+          container.appendChild(emptyDiv);
+        }
+        emptyDiv.style.display = 'block';
+      } else if (emptyDiv) {
+        emptyDiv.style.display = 'none';
+      }
+    });
+  }
+});
+</script>
+
+{% endblock %}

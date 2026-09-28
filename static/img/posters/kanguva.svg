@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b0764"/>
+      <stop offset="100%" stop-color="#581c87"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#bg)"/>
+  
+  <!-- Film Reel Header Icon -->
+  <g transform="translate(160, 80) scale(1.6)" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.9">
+    <rect x="2" y="2" width="44" height="44" rx="8" fill="#18181B" opacity="0.4"/>
+    <circle cx="24" cy="24" r="14" stroke="url(#accent)" stroke-width="3"/>
+    <circle cx="24" cy="24" r="4" fill="#EC4899"/>
+  </g>
+
+  <!-- Cinema Badge -->
+  <rect x="130" y="200" width="140" height="26" rx="13" fill="url(#accent)"/>
+  <text x="200" y="217" font-family="system-ui, sans-serif" font-weight="800" font-size="11" fill="#FFFFFF" text-anchor="middle" letter-spacing="1.5">UPCOMING</text>
+
+  <!-- Movie Title -->
+  <text x="200" y="320" font-family="system-ui, sans-serif" font-weight="900" font-size="26" fill="#FFFFFF" text-anchor="middle">Kanguva</text>
+  
+  <rect x="150" y="345" width="100" height="3" fill="url(#accent)" rx="1.5"/>
+
+  <!-- Subtitle / Genre -->
+  <text x="200" y="380" font-family="system-ui, sans-serif" font-weight="600" font-size="14" fill="#E9D5FF" text-anchor="middle">Historical • Fantasy</text>
+  
+  <!-- Footer Branding -->
+  <text x="200" y="540" font-family="system-ui, sans-serif" font-weight="800" font-size="14" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">BINGEBOOTH CINEMA</text>
+  <text x="200" y="560" font-family="system-ui, sans-serif" font-weight="500" font-size="11" fill="#9CA3AF" text-anchor="middle">Official Release</text>
+</svg>

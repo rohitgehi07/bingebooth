@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In — BingeBooth{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+  <div class="bg-bingeSurface border border-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-6">
+    
+    <div class="text-center space-y-2">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-binge flex items-center justify-center mx-auto shadow-lg">
+        <i data-lucide="clapperboard" class="w-6 h-6 text-white"></i>
+      </div>
+      <h1 class="font-heading font-extrabold text-2xl text-white">Welcome Back</h1>
+      <p class="text-xs text-gray-400">Sign in to manage your movie tickets & profile</p>
+    </div>
+
+    <!-- Quick Demo Logins Banner -->
+    <div class="bg-purple-950/40 border border-purple-600/40 rounded-2xl p-3 text-xs space-y-1 text-purple-300">
+      <p class="font-bold text-white">🔑 Demo Credentials:</p>
+      <p>Admin: <code class="text-pink-300">admin@bingebooth.com</code> / <code class="text-pink-300">Admin@123</code></p>
+      <p>User: <code class="text-pink-300">demo@bingebooth.com</code> / <code class="text-pink-300">Demo@123</code></p>
+    </div>
+
+    <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">Email Address</label>
+        <input type="email" name="email" required placeholder="you@example.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">Password</label>
+        <input type="password" name="password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-gray-400">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="remember" class="rounded bg-gray-900 border-gray-700 text-purple-600">
+          <span>Remember me</span>
+        </label>
+      </div>
+
+      <button type="submit" class="w-full bg-gradient-binge text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg shadow-purple-600/40 hover:scale-[1.01] transition-all">
+        Sign In
+      </button>
+    </form>
+
+    <div class="text-center text-xs text-gray-400 pt-2 border-t border-gray-800">
+      Don't have an account? 
+      <a href="{{ url_for('auth.register') }}" class="text-purple-400 font-bold hover:underline">Register now</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

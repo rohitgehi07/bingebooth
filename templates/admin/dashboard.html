@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Cinema Intelligence — Admin Business Analytics{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex bg-bingeDark">
+  
+  <!-- Admin Sidebar Navigation -->
+  <aside class="w-64 bg-bingeSurface border-r border-gray-200 dark:border-gray-800 p-6 flex flex-col justify-between hidden md:flex">
+    <div class="space-y-6">
+      
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-binge flex items-center justify-center">
+          <i data-lucide="shield" class="w-5 h-5 text-white"></i>
+        </div>
+        <span class="font-heading font-extrabold text-lg text-gray-900 dark:text-white">Admin Portal</span>
+      </div>
+
+      <nav class="space-y-1.5 text-xs font-semibold">
+        <!-- NEW FEATURE 4: Cinema Intelligence Nav -->
+        <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-600/40">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-purple-600 dark:text-purple-400"></i>
+          <span>Cinema Intelligence</span>
+        </a>
+
+        <!-- FIX 4: Site Activity Nav -->
+        <a href="{{ url_for('admin.site_activity') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          <span>Site Activity (Traffic)</span>
+        </a>
+
+        <a href="{{ url_for('admin.movies') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="film" class="w-4 h-4"></i>
+          <span>Manage Movies</span>
+        </a>
+        <a href="{{ url_for('admin.theatres') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="building" class="w-4 h-4"></i>
+          <span>Manage Theatres</span>
+        </a>
+        <a href="{{ url_for('admin.shows') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>Schedule Shows</span>
+        </a>
+        <a href="{{ url_for('admin.bookings') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="ticket" class="w-4 h-4"></i>
+          <span>View Bookings</span>
+        </a>
+        <a href="{{ url_for('admin.users') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>User Accounts</span>
+        </a>
+      </nav>
+
+    </div>
+
+    <a href="{{ url_for('main.index') }}" class="flex items-center gap-2 text-xs text-gray-500 hover:text-purple-600 pt-4 border-t border-gray-200 dark:border-gray-800">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      <span>Back to Public Site</span>
+    </a>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto">
+    
+    <div>
+      <span class="bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-600/40 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+        Business Data Analytics
+      </span>
+      <h1 class="font-heading font-extrabold text-2xl md:text-3xl text-gray-900 dark:text-white mt-1">Cinema Intelligence</h1>
+      <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Live business performance, revenue trends, food sales & occupancy metrics</p>
+    </div>
+
+    <!-- Stat Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow space-y-2">
+        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Revenue</span>
+        <div class="text-2xl font-extrabold text-gray-900 dark:text-white">₹{{ total_revenue }}</div>
+        <span class="text-[10px] text-emerald-600 font-semibold">Today: ₹{{ today_revenue }}</span>
+      </div>
+
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow space-y-2">
+        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Bookings</span>
+        <div class="text-2xl font-extrabold text-purple-600 dark:text-purple-400">{{ total_bookings }}</div>
+        <span class="text-[10px] text-gray-500">Today: {{ today_bookings }} confirmed</span>
+      </div>
+
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow space-y-2">
+        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Occupancy Rate</span>
+        <div class="text-2xl font-extrabold text-amber-500">{{ occupancy_rate }}%</div>
+        <span class="text-[10px] text-gray-500">Avg capacity booked</span>
+      </div>
+
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow space-y-2">
+        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Most Ordered Snack</span>
+        <div class="text-base font-extrabold text-pink-600 dark:text-pink-400 truncate">{{ most_ordered_food }}</div>
+        <span class="text-[10px] text-gray-500">Top selling concession item</span>
+      </div>
+
+    </div>
+
+    <!-- Additional Intelligence Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Most Booked Movie</span>
+          <h4 class="text-lg font-extrabold text-gray-900 dark:text-white mt-0.5">{{ most_booked_movie }}</h4>
+        </div>
+        <div class="text-3xl">🍿</div>
+      </div>
+
+      <!-- Peak Showtime Breakdown Card -->
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Peak Showtime Slot</span>
+          <h4 class="text-lg font-extrabold text-purple-600 dark:text-purple-400 mt-0.5">{{ peak_slot }}</h4>
+          <span class="text-[10px] text-gray-500">Evening: {{ slot_counts.Evening }} • Night: {{ slot_counts.Night }} bookings</span>
+        </div>
+        <div class="text-3xl">⏰</div>
+      </div>
+    </div>
+
+    <!-- Chart.js Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- Revenue Line Chart -->
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-xl space-y-4">
+        <h3 class="font-heading font-extrabold text-base text-gray-900 dark:text-white">Revenue Performance (14 Days)</h3>
+        <div class="h-64">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Top Movies Bar Chart -->
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-xl space-y-4">
+        <h3 class="font-heading font-extrabold text-base text-gray-900 dark:text-white">Top Performing Movies (Revenue)</h3>
+        <div class="h-64">
+          <canvas id="topMoviesChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Top Performing Movies Ranked Table -->
+    <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-xl space-y-4">
+      <h3 class="font-heading font-extrabold text-base text-gray-900 dark:text-white">Top Movies Leaderboard</h3>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-gray-700 dark:text-gray-300">
+          <thead class="bg-gray-100 dark:bg-gray-900 text-gray-500 uppercase text-[10px] font-bold">
+            <tr>
+              <th class="p-3">Rank</th>
+              <th class="p-3">Movie Title</th>
+              <th class="p-3">Average Rating</th>
+              <th class="p-3">Total Bookings</th>
+              <th class="p-3">Total Revenue</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+            {% for m in top_movies %}
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                <td class="p-3 font-bold text-purple-600 dark:text-purple-400">#{{ loop.index }}</td>
+                <td class="p-3 font-bold text-gray-900 dark:text-white">{{ m[0] }}</td>
+                <td class="p-3 font-bold text-amber-500">★ {{ m[1] }}</td>
+                <td class="p-3 font-mono font-bold">{{ m[2] }} tickets</td>
+                <td class="p-3 font-extrabold text-gray-900 dark:text-white">₹{{ m[3] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dates = JSON.parse('{{ chart_dates | safe }}');
+    const revenues = JSON.parse('{{ chart_revenue | safe }}');
+    const movieLabels = JSON.parse('{{ top_movie_labels | safe }}');
+    const movieValues = JSON.parse('{{ top_movie_values | safe }}');
+
+    // Revenue Line Chart
+    new Chart(document.getElementById('revenueChart'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: 'Revenue (₹)',
+          data: revenues,
+          borderColor: '#7C3AED',
+          backgroundColor: 'rgba(124, 58, 237, 0.15)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#9CA3AF' } },
+          y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#9CA3AF' } }
+        }
+      }
+    });
+
+    // Top Movies Bar Chart
+    new Chart(document.getElementById('topMoviesChart'), {
+      type: 'bar',
+      data: {
+        labels: movieLabels,
+        datasets: [{
+          label: 'Total Revenue (₹)',
+          data: movieValues,
+          backgroundColor: '#EC4899',
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#9CA3AF' } },
+          y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#9CA3AF' } }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

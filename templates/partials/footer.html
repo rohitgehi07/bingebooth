@@ -1,0 +1,116 @@
+<footer class="bg-bingeSurface border-t border-gray-800 text-gray-400 mt-20">
+  
+  <!-- 3-Column Strip -->
+  <div class="border-b border-gray-800 bg-gray-950/60 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- Customer Care Column -->
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-400 flex-shrink-0 shadow-lg">
+          <i data-lucide="headphone-off" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-gray-200 tracking-wider uppercase">{{ t('customer_care_title') }}</h4>
+          <div class="mt-1 flex items-center gap-2">
+            <a href="tel:7888081697" class="text-lg font-extrabold text-white hover:text-pink-400 transition-colors">
+              7888081697
+            </a>
+            <a href="tel:7888081697" class="bg-gradient-binge text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow hover:opacity-90 transition-opacity">
+              {{ t('call_us') }}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resend Confirmation Column -->
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-400 flex-shrink-0 shadow-lg">
+          <i data-lucide="ticket" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-gray-200 tracking-wider uppercase">{{ t('resend_confirmation_title') }}</h4>
+          <p class="text-xs text-gray-400 mt-0.5">Lost your booking code? Resend SMS/Email instantly.</p>
+        </div>
+      </div>
+
+      <!-- Newsletter Column -->
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-400 flex-shrink-0 shadow-lg">
+          <i data-lucide="mail" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-gray-200 tracking-wider uppercase">{{ t('subscribe_newsletter_title') }}</h4>
+          <div class="mt-1 flex items-center gap-2">
+            <input type="email" placeholder="Enter your email" class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-1 text-xs text-gray-200 focus:outline-none focus:border-purple-500">
+            <button class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1 rounded-lg font-semibold transition-colors">Join</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Links Grid -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 text-xs">
+    
+    <div>
+      <h5 class="font-bold text-gray-200 uppercase tracking-wider mb-3">MOVIES IN {{ current_city | upper }}</h5>
+      <ul class="space-y-2 text-gray-400">
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Action & Sci-Fi</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Romantic Dramas</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Horror & Thrillers</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Animated Movies</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h5 class="font-bold text-gray-200 uppercase tracking-wider mb-3">UPCOMING SHOWS</h5>
+      <ul class="space-y-2 text-gray-400">
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Releasing Today</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Releasing Tomorrow</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">This Weekend Special</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Next Month Blockbusters</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h5 class="font-bold text-gray-200 uppercase tracking-wider mb-3">BY GENRE</h5>
+      <ul class="space-y-2 text-gray-400">
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Action Movies</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Comedy Movies</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Drama Movies</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Sci-Fi Blockbusters</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h5 class="font-bold text-gray-200 uppercase tracking-wider mb-3">BY LANGUAGE</h5>
+      <ul class="space-y-2 text-gray-400">
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Hindi Movies</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">English Movies</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Marathi Movies</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">South Dubbed</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h5 class="font-bold text-gray-200 uppercase tracking-wider mb-3">THEATRES IN {{ current_city | upper }}</h5>
+      <ul class="space-y-2 text-gray-400">
+        <li><a href="#" class="hover:text-purple-400 transition-colors">PVR Cinemas</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">INOX Multiplex</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Cinepolis India</a></li>
+        <li><a href="#" class="hover:text-purple-400 transition-colors">Star Multiplex</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Copyright Strip -->
+  <div class="border-t border-gray-800/80 bg-gray-950 py-6 text-center text-xs text-gray-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p>© 2026 BingeBooth Entertainment Technologies Ltd. All Rights Reserved.</p>
+      <p class="text-purple-400/90 font-medium">{{ t('made_for_college') }}</p>
+    </div>
+  </div>
+
+</footer>

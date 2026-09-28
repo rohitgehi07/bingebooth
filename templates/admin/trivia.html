@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Movie Trivia — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-6" x-data="{ showAddModal: false }">
+  
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="font-heading font-extrabold text-2xl text-gray-900 dark:text-white">Movie Trivia Management</h1>
+      <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Manage pre-show wait-time trivia questions and BingePoints rewards</p>
+    </div>
+
+    <button @click="showAddModal = true" class="bg-gradient-binge text-white font-bold text-xs px-5 py-2.5 rounded-2xl shadow-lg flex items-center gap-2">
+      <i data-lucide="plus" class="w-4 h-4"></i> Add Trivia Question
+    </button>
+  </div>
+
+  <!-- Trivia Questions Table -->
+  <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-gray-800 dark:text-gray-300">
+        <thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-[10px] font-bold border-b border-gray-200 dark:border-gray-800">
+          <tr>
+            <th class="p-4">ID</th>
+            <th class="p-4">Movie</th>
+            <th class="p-4">Question</th>
+            <th class="p-4">Options</th>
+            <th class="p-4">Correct Answer</th>
+            <th class="p-4">Reward</th>
+            <th class="p-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-800/80">
+          {% for tq in trivia_questions %}
+            <tr class="hover:bg-purple-50/50 dark:hover:bg-gray-800/40">
+              <td class="p-4 font-mono font-bold text-purple-600 dark:text-purple-400">#{{ tq.id }}</td>
+              <td class="p-4 font-bold text-gray-900 dark:text-white">{{ tq.movie.title }}</td>
+              <td class="p-4 max-w-xs leading-relaxed">{{ tq.question_text }}</td>
+              <td class="p-4 text-[11px] space-y-0.5">
+                <div><strong class="text-purple-600 dark:text-purple-400">A:</strong> {{ tq.option_a }}</div>
+                <div><strong class="text-purple-600 dark:text-purple-400">B:</strong> {{ tq.option_b }}</div>
+                <div><strong class="text-purple-600 dark:text-purple-400">C:</strong> {{ tq.option_c }}</div>
+              </td>
+              <td class="p-4">
+                <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-600 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase">
+                  Option {{ tq.correct_option.upper() }}
+                </span>
+              </td>
+              <td class="p-4 font-bold text-amber-600 dark:text-amber-400">🪙 +{{ tq.points_reward }} pts</td>
+              <td class="p-4">
+                <form action="{{ url_for('admin.trivia') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this question?')">
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="trivia_id" value="{{ tq.id }}">
+                  <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-700 font-semibold p-1">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="p-8 text-center text-gray-500">No trivia questions added yet. Click "Add Trivia Question" to create one.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Trivia Question Modal -->
+  <div x-show="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" style="display: none;">
+    <div class="bg-white dark:bg-bingeElevated border border-gray-200 dark:border-gray-700/90 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
+        <h3 class="font-heading font-extrabold text-base text-gray-900 dark:text-white">Add Movie Trivia Question</h3>
+        <button @click="showAddModal = false" type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form action="{{ url_for('admin.trivia') }}" method="POST" class="space-y-4 text-xs">
+        <input type="hidden" name="action" value="add">
+
+        <div>
+          <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Select Movie</label>
+          <select name="movie_id" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-3 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+            {% for m in movies %}
+              <option value="{{ m.id }}">{{ m.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Question Text</label>
+          <textarea name="question_text" rows="2" required placeholder="e.g. Which actor plays the main villain?" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-3 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"></textarea>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Option A</label>
+            <input type="text" name="option_a" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-2.5 text-gray-900 dark:text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Option B</label>
+            <input type="text" name="option_b" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-2.5 text-gray-900 dark:text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Option C</label>
+            <input type="text" name="option_c" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-2.5 text-gray-900 dark:text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Correct Option</label>
+            <select name="correct_option" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-2.5 text-gray-900 dark:text-white">
+              <option value="a">Option A</option>
+              <option value="b">Option B</option>
+              <option value="c">Option C</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Reward BingePoints</label>
+            <input type="number" name="points_reward" value="5" min="1" max="50" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-2.5 text-gray-900 dark:text-white">
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button @click="showAddModal = false" type="button" class="bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-bold px-4 py-2 rounded-xl">Cancel</button>
+          <button type="submit" class="bg-gradient-binge text-white font-bold px-6 py-2 rounded-xl shadow">Save Question</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

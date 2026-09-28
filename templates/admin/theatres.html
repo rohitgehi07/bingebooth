@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Theatres — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-6" x-data="{ showModal: false }">
+  
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="font-heading font-extrabold text-2xl text-white">Theatre Management</h1>
+      <p class="text-xs text-gray-400 mt-1">Configure cinema halls, screens, and location amenities</p>
+    </div>
+
+    <button @click="showModal = true" class="bg-gradient-binge text-white font-bold text-xs px-5 py-2.5 rounded-2xl shadow-lg flex items-center gap-2">
+      <i data-lucide="plus" class="w-4 h-4"></i> Add Theatre
+    </button>
+  </div>
+
+  <div class="bg-bingeSurface border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-gray-300">
+        <thead class="bg-gray-900 text-gray-400 uppercase text-[10px] font-bold border-b border-gray-800">
+          <tr>
+            <th class="p-4">Theatre Name</th>
+            <th class="p-4">City</th>
+            <th class="p-4">Address</th>
+            <th class="p-4">Screens</th>
+            <th class="p-4">Amenities</th>
+            <th class="p-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800/80">
+          {% for t in theatres %}
+            <tr class="hover:bg-gray-800/40">
+              <td class="p-4 font-bold text-white text-sm">{{ t.name }}</td>
+              <td class="p-4 text-purple-300 font-semibold">{{ t.city.name }}</td>
+              <td class="p-4 text-gray-400">{{ t.address }}</td>
+              <td class="p-4 font-mono font-bold text-gray-200">{{ t.screens | length }} Audi(s)</td>
+              <td class="p-4 text-gray-300">{{ t.amenities }}</td>
+              <td class="p-4">
+                <form action="{{ url_for('admin.theatres') }}" method="POST" onsubmit="return confirm('Delete this theatre?')">
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="theatre_id" value="{{ t.id }}">
+                  <button type="submit" class="text-red-400 hover:text-red-300 font-semibold p-1">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div x-show="showModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-bingeElevated border border-gray-700 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+        <h3 class="font-heading font-extrabold text-lg text-white">Add Theatre</h3>
+        <button @click="showModal = false" class="text-gray-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form action="{{ url_for('admin.theatres') }}" method="POST" class="space-y-4 text-xs">
+        <input type="hidden" name="action" value="add">
+        
+        <div>
+          <label class="block font-bold text-gray-300 mb-1">Theatre Name</label>
+          <input type="text" name="name" required placeholder="PVR Cinemas" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-white">
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-300 mb-1">City</label>
+          <select name="city_id" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-white">
+            {% for c in cities %}
+              <option value="{{ c.id }}">{{ c.name }} ({{ c.state }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-300 mb-1">Full Address</label>
+          <textarea name="address" required rows="2" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-white"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-binge text-white font-bold py-3 rounded-2xl shadow-lg">
+          Create Theatre
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

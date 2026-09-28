@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account — BingeBooth{% endblock %}
+
+{% block content %}
+<div class="min-h-[85vh] flex items-center justify-center px-4 py-12">
+  <div class="bg-bingeSurface border border-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-6">
+    
+    <div class="text-center space-y-2">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-binge flex items-center justify-center mx-auto shadow-lg">
+        <i data-lucide="user-plus" class="w-6 h-6 text-white"></i>
+      </div>
+      <h1 class="font-heading font-extrabold text-2xl text-white">Join BingeBooth</h1>
+      <p class="text-xs text-gray-400">Create your account to unlock instant ticket bookings</p>
+    </div>
+
+    <form action="{{ url_for('auth.register') }}" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">Full Name</label>
+        <input type="text" name="name" required placeholder="John Doe" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">Email Address</label>
+        <input type="email" name="email" required placeholder="you@example.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">Phone Number</label>
+        <input type="tel" name="phone" placeholder="9876543210" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">Password</label>
+        <input type="password" name="password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">Confirm Password</label>
+        <input type="password" name="confirm_password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+      </div>
+
+      <button type="submit" class="w-full bg-gradient-binge text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg shadow-purple-600/40 hover:scale-[1.01] transition-all">
+        Create Account
+      </button>
+    </form>
+
+    <div class="text-center text-xs text-gray-400 pt-2 border-t border-gray-800">
+      Already have an account? 
+      <a href="{{ url_for('auth.login') }}" class="text-purple-400 font-bold hover:underline">Sign in</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

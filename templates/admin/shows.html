@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Schedule Shows — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-6" x-data="{ showModal: false }">
+  
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="font-heading font-extrabold text-2xl text-white">Showtimes Scheduler</h1>
+      <p class="text-xs text-gray-400 mt-1">Schedule movie screenings across screens with auto category pricing</p>
+    </div>
+
+    <button @click="showModal = true" class="bg-gradient-binge text-white font-bold text-xs px-5 py-2.5 rounded-2xl shadow-lg flex items-center gap-2">
+      <i data-lucide="plus" class="w-4 h-4"></i> Schedule Show
+    </button>
+  </div>
+
+  <div class="bg-bingeSurface border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-gray-300">
+        <thead class="bg-gray-900 text-gray-400 uppercase text-[10px] font-bold border-b border-gray-800">
+          <tr>
+            <th class="p-4">Movie</th>
+            <th class="p-4">Theatre / Screen</th>
+            <th class="p-4">Date & Time</th>
+            <th class="p-4">Format / Lang</th>
+            <th class="p-4">Base Price</th>
+            <th class="p-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800/80">
+          {% for s in shows %}
+            <tr class="hover:bg-gray-800/40">
+              <td class="p-4 font-bold text-white text-sm">{{ s.movie.title }}</td>
+              <td class="p-4 text-purple-300">
+                <span class="font-bold text-white block">{{ s.screen.theatre.name }}</span>
+                <span class="text-gray-400 text-[11px]">{{ s.screen.name }} ({{ s.screen.theatre.city.name }})</span>
+              </td>
+              <td class="p-4 font-mono font-bold text-gray-200">{{ s.show_datetime.strftime('%b %d, %Y | %I:%M %p') }}</td>
+              <td class="p-4">{{ s.format }} • {{ s.language }}</td>
+              <td class="p-4 font-extrabold text-emerald-400">₹{{ s.base_price | int }}</td>
+              <td class="p-4">
+                <form action="{{ url_for('admin.shows') }}" method="POST" onsubmit="return confirm('Cancel this show?')">
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="show_id" value="{{ s.id }}">
+                  <button type="submit" class="text-red-400 hover:text-red-300 font-semibold p-1">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div x-show="showModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-bingeElevated border border-gray-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+        <h3 class="font-heading font-extrabold text-lg text-white">Schedule New Show</h3>
+        <button @click="showModal = false" class="text-gray-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form action="{{ url_for('admin.shows') }}" method="POST" class="space-y-4 text-xs">
+        <input type="hidden" name="action" value="add">
+        
+        <div>
+          <label class="block font-bold text-gray-300 mb-1">Select Movie</label>
+          <select name="movie_id" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-white">
+            {% for m in movies %}
+              <option value="{{ m.id }}">{{ m.title }} ({{ m.status }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-300 mb-1">Select Screen</label>
+          <select name="screen_id" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-white">
+            {% for sc in screens %}
+              <option value="{{ sc.id }}">{{ sc.theatre.name }} — {{ sc.name }} ({{ sc.theatre.city.name }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-gray-300 mb-1">Show Date & Time</label>
+            <input type="datetime-local" name="show_datetime" required value="2026-09-20T18:30" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-300 mb-1">Silver Base Price (₹)</label>
+            <input type="number" name="base_price" required value="200" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-binge text-white font-bold py-3 rounded-2xl shadow-lg">
+          Schedule Show & Auto-Generate Seat Categories
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

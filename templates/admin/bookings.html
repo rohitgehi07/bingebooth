@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Bookings — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+  
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="font-heading font-extrabold text-2xl text-white">All Bookings</h1>
+      <p class="text-xs text-gray-400 mt-1">Search and manage user ticket transactions</p>
+    </div>
+
+    <!-- Search input -->
+    <form action="{{ url_for('admin.bookings') }}" method="GET" class="flex gap-2">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search code or seats..." class="bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-xs text-white">
+      <button type="submit" class="bg-purple-600 text-white font-bold text-xs px-4 py-2 rounded-xl">Search</button>
+    </form>
+  </div>
+
+  <div class="bg-bingeSurface border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-gray-300">
+        <thead class="bg-gray-900 text-gray-400 uppercase text-[10px] font-bold border-b border-gray-800">
+          <tr>
+            <th class="p-4">Code</th>
+            <th class="p-4">User</th>
+            <th class="p-4">Movie</th>
+            <th class="p-4">Theatre</th>
+            <th class="p-4">Seats</th>
+            <th class="p-4">Total</th>
+            <th class="p-4">Status</th>
+            <th class="p-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800/80">
+          {% for b in bookings %}
+            <tr class="hover:bg-gray-800/40">
+              <td class="p-4 font-mono font-bold text-white">{{ b.booking_code }}</td>
+              <td class="p-4">
+                <div class="font-bold text-white">{{ b.user.name }}</div>
+                <div class="text-[10px] text-gray-400">{{ b.user.email }}</div>
+              </td>
+              <td class="p-4 font-bold text-purple-300">{{ b.show.movie.title }}</td>
+              <td class="p-4 text-gray-400">{{ b.show.screen.theatre.name }}</td>
+              <td class="p-4 font-mono text-gray-200">{{ b.seats_label }}</td>
+              <td class="p-4 font-extrabold text-white">₹{{ b.total_amount }}</td>
+              <td class="p-4">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase
+                             {% if b.status == 'confirmed' %} bg-emerald-950 text-emerald-300 border border-emerald-700
+                             {% elif b.status == 'pending' %} bg-amber-950 text-amber-300 border border-amber-700
+                             {% else %} bg-gray-800 text-gray-400 {% endif %}">
+                  {{ b.status }}
+                </span>
+              </td>
+              <td class="p-4">
+                <a href="{{ url_for('booking.ticket', code=b.booking_code) }}" target="_blank" class="text-purple-400 hover:text-purple-300 font-bold">
+                  Ticket →
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

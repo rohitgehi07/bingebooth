@@ -1,0 +1,61 @@
+<!-- Movie Card Partial -->
+<div class="poster-card bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-lg flex flex-col group relative transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20 hover:border-purple-500/50 hover:-translate-y-1"
+     data-movie-card="true"
+     data-genres="{{ movie.genres }}"
+     data-languages="{{ movie.languages }}">
+  
+  <!-- Image Poster Container -->
+  <div class="aspect-[2/3] w-full overflow-hidden relative bg-purple-100 dark:bg-purple-950/40">
+    <img src="{{ movie.poster_url }}" 
+         alt="{{ movie.title }}" 
+         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+         loading="lazy"
+         onerror="this.onerror=null;this.src='/static/img/posters/placeholder.svg';">
+
+    <!-- Rating Badge Overlay -->
+    <div class="absolute top-3 left-3 bg-gray-950/80 backdrop-blur-md border border-gray-700/80 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow">
+      <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i>
+      <span class="text-xs font-bold text-white">{{ movie.rating }}</span>
+      <span class="text-[10px] text-gray-400">({{ movie.votes_count }})</span>
+    </div>
+
+    <!-- Certificate Badge -->
+    <div class="absolute top-3 right-3 bg-purple-950/80 border border-purple-500/50 text-purple-300 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase">
+      {{ movie.certificate }}
+    </div>
+
+    <!-- Quick Book Overlay Button on Hover -->
+    <div class="absolute inset-0 bg-gradient-to-t from-purple-950/90 via-purple-950/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+      {% if movie.status == 'now_showing' %}
+        <a href="{{ url_for('main.showtimes', slug=movie.slug) }}" class="w-full bg-gradient-binge text-white text-xs font-bold py-2.5 rounded-xl text-center shadow-lg shadow-purple-600/40 hover:opacity-95 transition-all">
+          🎟️ {{ t('hero_book_now') }}
+        </a>
+      {% elif movie.status == 'upcoming' %}
+        <a href="{{ url_for('main.movie_detail', slug=movie.slug) }}" class="w-full bg-gray-800 text-white text-xs font-bold py-2.5 rounded-xl text-center hover:bg-gray-700 transition-all">
+          🔔 {{ t('notify_me') }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Movie Content Details -->
+  <div class="p-3.5 flex flex-col justify-between flex-grow">
+    <div>
+      <h3 class="font-heading font-bold text-sm text-gray-900 dark:text-white line-clamp-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+        <a href="{{ url_for('main.movie_detail', slug=movie.slug) }}">
+          {{ movie.title_hi if current_lang == 'hi' and movie.title_hi else movie.title }}
+        </a>
+      </h3>
+
+      <p class="text-[11px] text-gray-600 dark:text-gray-400 mt-1 truncate">
+        {{ movie.languages }} • {{ movie.formats }}
+      </p>
+    </div>
+
+    <div class="mt-2.5 pt-2.5 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+      <span>{{ movie.duration_minutes }} mins</span>
+      <span class="text-purple-600 dark:text-purple-400 font-medium truncate max-w-[110px]">{{ movie.genres.split(',')[0] }}</span>
+    </div>
+  </div>
+
+</div>

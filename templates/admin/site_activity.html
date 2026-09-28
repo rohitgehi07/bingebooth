@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Site Activity — BingeBooth Admin Traffic Panel{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex bg-bingeDark">
+  
+  <!-- Admin Sidebar Navigation -->
+  <aside class="w-64 bg-bingeSurface border-r border-gray-200 dark:border-gray-800 p-6 flex flex-col justify-between hidden md:flex">
+    <div class="space-y-6">
+      
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-binge flex items-center justify-center">
+          <i data-lucide="shield" class="w-5 h-5 text-white"></i>
+        </div>
+        <span class="font-heading font-extrabold text-lg text-gray-900 dark:text-white">Admin Portal</span>
+      </div>
+
+      <nav class="space-y-1.5 text-xs font-semibold">
+        <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Cinema Intelligence</span>
+        </a>
+
+        <!-- FIX 4: Site Activity Nav -->
+        <a href="{{ url_for('admin.site_activity') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-pink-100 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-600/40">
+          <i data-lucide="activity" class="w-4 h-4 text-pink-600 dark:text-pink-400"></i>
+          <span>Site Activity (Traffic)</span>
+        </a>
+
+        <a href="{{ url_for('admin.movies') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="film" class="w-4 h-4"></i>
+          <span>Manage Movies</span>
+        </a>
+        <a href="{{ url_for('admin.theatres') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="building" class="w-4 h-4"></i>
+          <span>Manage Theatres</span>
+        </a>
+        <a href="{{ url_for('admin.shows') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>Schedule Shows</span>
+        </a>
+        <a href="{{ url_for('admin.bookings') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="ticket" class="w-4 h-4"></i>
+          <span>View Bookings</span>
+        </a>
+        <a href="{{ url_for('admin.users') }}" class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-400 hover:text-purple-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>User Accounts</span>
+        </a>
+      </nav>
+
+    </div>
+
+    <a href="{{ url_for('main.index') }}" class="flex items-center gap-2 text-xs text-gray-500 hover:text-purple-600 pt-4 border-t border-gray-200 dark:border-gray-800">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      <span>Back to Public Site</span>
+    </a>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto">
+    
+    <div>
+      <span class="bg-pink-100 dark:bg-pink-950 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-600/40 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+        Web Traffic & User Activity
+      </span>
+      <h1 class="font-heading font-extrabold text-2xl md:text-3xl text-gray-900 dark:text-white mt-1">Site Activity Dashboard</h1>
+      <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Real-time page visit logs, traffic trends, and unique visitor metrics</p>
+    </div>
+
+    <!-- Stat Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow space-y-2">
+        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Visits Today</span>
+        <div class="text-2xl font-extrabold text-purple-600 dark:text-purple-400">{{ visits_today }}</div>
+        <span class="text-[10px] text-gray-500">Page views logged today</span>
+      </div>
+
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow space-y-2">
+        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Visits This Week</span>
+        <div class="text-2xl font-extrabold text-pink-600 dark:text-pink-400">{{ visits_this_week }}</div>
+        <span class="text-[10px] text-gray-500">Last 7 days total</span>
+      </div>
+
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow space-y-2">
+        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unique Visitors</span>
+        <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ unique_sessions }}</div>
+        <span class="text-[10px] text-gray-500">Unique visitor sessions</span>
+      </div>
+
+      <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow space-y-2">
+        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">All-Time Page Views</span>
+        <div class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ total_visits_all_time }}</div>
+        <span class="text-[10px] text-gray-500">Total requests logged</span>
+      </div>
+
+    </div>
+
+    <!-- Traffic 14-Day Line Chart -->
+    <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-xl space-y-4">
+      <h3 class="font-heading font-extrabold text-base text-gray-900 dark:text-white">Page Visits Over Time (Last 14 Days)</h3>
+      <div class="h-64">
+        <canvas id="trafficChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Top Visited Pages & Recent Feed Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Top Visited Pages Table -->
+      <div class="lg:col-span-1 bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-xl space-y-4">
+        <h3 class="font-heading font-extrabold text-base text-gray-900 dark:text-white">Most Visited Pages</h3>
+        <div class="space-y-2 text-xs">
+          {% for p in top_pages %}
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800">
+              <span class="font-mono text-purple-700 dark:text-purple-400 truncate max-w-[180px]">{{ p[0] }}</span>
+              <span class="font-extrabold text-gray-900 dark:text-white">{{ p[1] }} views</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Recent 30 Visits Activity Feed -->
+      <div class="lg:col-span-2 bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-xl space-y-4">
+        <h3 class="font-heading font-extrabold text-base text-gray-900 dark:text-white">Recent Activity Feed (Last 30 Visits)</h3>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-gray-700 dark:text-gray-300">
+            <thead class="bg-gray-100 dark:bg-gray-900 text-gray-500 uppercase text-[10px] font-bold">
+              <tr>
+                <th class="p-3">Path</th>
+                <th class="p-3">Time</th>
+                <th class="p-3">User</th>
+                <th class="p-3">Device</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+              {% for v in recent_visits %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <td class="p-3 font-mono font-bold text-gray-900 dark:text-white truncate max-w-[200px]">{{ v.path }}</td>
+                  <td class="p-3 text-gray-500 font-mono">{{ v.visited_at.strftime('%H:%M:%S') }}</td>
+                  <td class="p-3 text-purple-600 dark:text-purple-400 font-semibold">{{ v.user.name if v.user else 'Guest' }}</td>
+                  <td class="p-3 text-gray-600 dark:text-gray-400">{{ v.device_type }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dates = JSON.parse('{{ chart_dates | safe }}');
+    const visits = JSON.parse('{{ chart_visits | safe }}');
+
+    new Chart(document.getElementById('trafficChart'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: 'Page Visits',
+          data: visits,
+          borderColor: '#EC4899',
+          backgroundColor: 'rgba(236, 72, 153, 0.15)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#9CA3AF' } },
+          y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#9CA3AF' } }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

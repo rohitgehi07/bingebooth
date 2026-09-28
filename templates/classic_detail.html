@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ movie.title }} — BingeBooth Classic Archive{% endblock %}
+
+{% block content %}
+
+<!-- Hero Banner Section -->
+<div class="relative w-full bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+  
+  <div class="relative h-[360px] md:h-[440px] w-full overflow-hidden">
+    <img src="{{ movie.banner_url }}" alt="{{ movie.title }}" class="w-full h-full object-cover object-center filter brightness-90">
+    <div class="absolute inset-0 bg-gradient-to-t from-bingeDark via-bingeDark/80 to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-bingeDark via-bingeDark/70 to-transparent"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative -mt-60 md:-mt-72 z-20 pb-12">
+    <div class="flex flex-col md:flex-row gap-8 items-start">
+      
+      <!-- Poster Left -->
+      <div class="w-56 sm:w-64 flex-shrink-0 mx-auto md:mx-0">
+        <div class="rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-500/60 relative bg-bingeSurface">
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="w-full aspect-[2/3] object-cover" onerror="this.onerror=null;this.src='/static/img/posters/placeholder.jpg';">
+        </div>
+
+        <!-- FIX 5: Required Badge -->
+        <div class="mt-3 bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-600/50 rounded-xl py-2.5 px-3 text-center text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center justify-center gap-1.5 shadow">
+          <span>🏛️ Classic — not currently in theatres</span>
+        </div>
+      </div>
+
+      <!-- Details Right -->
+      <div class="flex-1 text-white space-y-4 pt-4">
+        
+        <div class="flex items-center gap-2">
+          <span class="bg-amber-500 text-black text-xs font-extrabold px-3 py-1 rounded-full uppercase">
+            Released {{ movie.release_date.strftime('%Y') }}
+          </span>
+          <span class="text-xs text-gray-300">{{ movie.certificate }} • {{ movie.duration_minutes }} mins</span>
+        </div>
+
+        <h1 class="font-heading font-extrabold text-3xl sm:text-5xl tracking-tight leading-tight">
+          {{ movie.title }}
+        </h1>
+
+        <!-- Rating Block -->
+        <div class="flex items-center gap-4">
+          <div class="bg-black/60 backdrop-blur-md border border-gray-700 px-4 py-2 rounded-2xl flex items-center gap-2 shadow">
+            <i data-lucide="star" class="w-5 h-5 text-amber-400 fill-amber-400"></i>
+            <span class="text-base font-extrabold text-white">{{ movie.rating }} / 10</span>
+            <span class="text-xs text-gray-400">({{ movie.votes_count }} ratings)</span>
+          </div>
+        </div>
+
+        <p class="text-xs sm:text-sm text-gray-300 max-w-3xl leading-relaxed">
+          {{ movie.description }}
+        </p>
+
+        <div class="flex flex-wrap gap-2 pt-2">
+          {% for g in movie.genres.split(',') %}
+            <span class="bg-purple-900/60 border border-purple-500/40 text-purple-200 text-xs font-semibold px-3 py-1 rounded-full">
+              {{ g.strip() }}
+            </span>
+          {% endfor %}
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Lower Sections Container -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+  
+  <!-- Fun Fact / Trivia Section -->
+  <section class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-3xl p-6 shadow-md">
+    <h3 class="font-heading font-extrabold text-base text-amber-900 dark:text-amber-300 mb-2 flex items-center gap-2">
+      💡 Classic Trivia & Fun Facts
+    </h3>
+    <p class="text-xs sm:text-sm text-amber-950 dark:text-amber-200/90 leading-relaxed">
+      {{ movie.trivia or "This timeless masterpiece redefined Indian cinema with unforgettable dialogues, iconic musical compositions, and legendary performances that continue to inspire generations of filmmakers." }}
+    </p>
+  </section>
+
+  <!-- Cast Section -->
+  {% if cast %}
+    <section>
+      <h2 class="font-heading font-extrabold text-xl text-gray-900 dark:text-white mb-4">Legendary Cast & Crew</h2>
+      <div class="flex items-center gap-6 overflow-x-auto no-scrollbar py-2">
+        {% for actor in cast %}
+          <div class="flex flex-col items-center text-center w-28 flex-shrink-0">
+            <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-amber-500/50 shadow-lg bg-gray-800 mb-2">
+              <img src="{{ actor.image }}" alt="{{ actor.name }}" class="w-full h-full object-cover">
+            </div>
+            <span class="text-xs font-bold text-gray-800 dark:text-gray-200 line-clamp-1">{{ actor.name }}</span>
+            <span class="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1">{{ actor.role }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Photo Gallery -->
+  {% if images %}
+    <section>
+      <h2 class="font-heading font-extrabold text-xl text-gray-900 dark:text-white mb-4">Archival Photo Gallery</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {% for img in images %}
+          <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 aspect-video bg-gray-900 group">
+            <img src="{{ img.image_url }}" alt="{{ img.caption }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Reviews -->
+  <section class="pt-6 border-t border-gray-200 dark:border-gray-800">
+    <h2 class="font-heading font-extrabold text-xl text-gray-900 dark:text-white mb-6">Audience Reviews</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {% for r in reviews %}
+        <div class="bg-bingeSurface border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-2 shadow">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-xs text-gray-800 dark:text-gray-200">{{ r.reviewer_name }}</span>
+            <span class="text-amber-500 font-bold text-xs">★ {{ r.rating }}</span>
+          </div>
+          <h5 class="text-xs font-bold text-gray-900 dark:text-white">{{ r.title }}</h5>
+          <p class="text-xs text-gray-600 dark:text-gray-300">{{ r.body }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+
+{% endblock %}
